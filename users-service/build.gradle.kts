@@ -21,10 +21,23 @@ repositories {
 extra["springCloudVersion"] = "2025.0.0"
 
 dependencies {
+	//Web
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	//Eureka
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-	//runtimeOnly("org.postgresql:postgresql")
-	//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	//Security
+	//implementation("org.springframework.boot:spring-boot-starter-security")
+	//Postgres
+	runtimeOnly("org.postgresql:postgresql")
+	//Hibernate
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	//Lombok
+	compileOnly("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
+	//JWT
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 }
 
 dependencyManagement {
