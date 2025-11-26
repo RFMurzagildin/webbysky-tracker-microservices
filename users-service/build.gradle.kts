@@ -38,6 +38,12 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+	//Redis
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	//Mail Sender
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	//Validation
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 dependencyManagement {

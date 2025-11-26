@@ -26,9 +26,13 @@ public class User {
     @Column(name = "role")
     private UserRole role = UserRole.USER_ROLE;
 
-    public User(String username, String mail, String password){
+    @Column(name = "mail_verified")
+    private Boolean emailVerified;
+
+    public User(String username, String mail, String password, Boolean emailVerified){
         this.username = username;
         this.mail = mail;
         this.password = password;
+        this.emailVerified = emailVerified;
     }
 }
