@@ -17,8 +17,8 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "mail", nullable = false, unique = true)
-    private String mail;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -29,9 +29,9 @@ public class User {
     @Column(name = "mail_verified")
     private Boolean emailVerified;
 
-    public User(String username, String mail, String password, Boolean emailVerified){
+    public User(String username, String email, String password, Boolean emailVerified){
         this.username = username;
-        this.mail = mail;
+        this.email = email;
         this.password = password;
         this.emailVerified = emailVerified;
     }

@@ -16,15 +16,13 @@ public class RegistrationUserDto {
 
     @NotBlank
     @Email
-    private String mail;
+    private String email;
 
     @NotBlank
-    @Size(min = 8)
     @Password
     private String password;
 
     @NotBlank
-    @Size(min = 8)
     private String confirmPassword;
 
 }

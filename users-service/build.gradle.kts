@@ -26,7 +26,7 @@ dependencies {
 	//Eureka
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 	//Security
-	//implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-security")
 	//Postgres
 	runtimeOnly("org.postgresql:postgresql")
 	//Hibernate

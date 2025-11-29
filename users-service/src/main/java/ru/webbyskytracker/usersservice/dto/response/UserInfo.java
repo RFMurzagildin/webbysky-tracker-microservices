@@ -2,11 +2,14 @@ package ru.webbyskytracker.usersservice.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class UserDtoResponse {
+@NoArgsConstructor
+public class UserInfo {
+    private Long id;
     private String username;
     private String email;
-    protected String message;
+    private String role;
 }
