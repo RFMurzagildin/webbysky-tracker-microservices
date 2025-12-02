@@ -6,7 +6,7 @@ plugins {
 
 group = "ru.webbyskytracker"
 version = "0.0.1-SNAPSHOT"
-description = "users-service"
+description = "sender-to-email-service"
 
 java {
 	toolchain {
@@ -25,23 +25,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	//Eureka
 	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
-	//Security
-	implementation("org.springframework.boot:spring-boot-starter-security")
-	//Postgres
-	runtimeOnly("org.postgresql:postgresql")
-	//Hibernate
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	//Lombok
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
-	//JWT
-	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-	//Redis
-	implementation("org.springframework.boot:spring-boot-starter-data-redis")
-	//Validation
-	implementation("org.springframework.boot:spring-boot-starter-validation")
+	//Mail Sender
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 	//Kafka
 	implementation("org.springframework.kafka:spring-kafka")
 }
