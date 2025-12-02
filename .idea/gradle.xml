@@ -17,6 +17,16 @@
       </GradleProjectSettings>
       <GradleProjectSettings>
         <option name="distributionType" value="LOCAL" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/config-server" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../4_semester/ORIS/gradle-8.13" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/config-server" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/eureka-server" />
         <option name="gradleHome" value="$PROJECT_DIR$/../../../4_semester/ORIS/gradle-8.13" />
         <option name="modules">

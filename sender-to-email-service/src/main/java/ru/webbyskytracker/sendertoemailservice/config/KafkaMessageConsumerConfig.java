@@ -11,7 +11,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import ru.webbyskytracker.sendertoemailservice.kafka.model.EmailVerifiedEvent;
 import ru.webbyskytracker.sendertoemailservice.kafka.model.VerificationCodeEvent;
-
 import java.util.HashMap;
 import java.util.Map;
 
