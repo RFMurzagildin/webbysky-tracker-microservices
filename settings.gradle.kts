@@ -1,4 +1,5 @@
 rootProject.name = "webbysky-tracker-microservices"
 
-include("eureka-server")
-include("user-service")
+include("eureka-server",
+    "user-service",
+    "config-server")

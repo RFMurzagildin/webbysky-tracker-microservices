@@ -1,8 +1,7 @@
 package ru.webbyskytracker.usersservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +20,7 @@ import ru.webbyskytracker.usersservice.security.jwt.JwtService;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final EmailVerificationService emailVerificationService;
@@ -28,7 +28,6 @@ public class AuthService {
     private final JwtService jwtService;
     private final KafkaTemplate<String, VerificationCodeEvent> verificationCodeKafkaTemplate;
     private final KafkaTemplate<String,  EmailVerifiedEvent > emailVerifiedKafkaTemplate;
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     public User initiateRegistration(RegistrationUserDto dto){
         if(!dto.getPassword().equals(dto.getConfirmPassword())){
