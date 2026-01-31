@@ -46,6 +46,8 @@ dependencies {
 	implementation("org.springframework.kafka:spring-kafka")
 	//Spring Cloud Config
 	//implementation("org.springframework.cloud:spring-cloud-starter-config")
+	//Logback
+	implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 }
 
 dependencyManagement {
