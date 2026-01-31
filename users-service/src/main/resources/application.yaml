@@ -41,6 +41,6 @@ logging:
 jwt:
   secret: ${JWT_SECRET_KEY}
   access-token:
-    expiration-minutes: 1
+    expiration-minutes: 30
   refresh-token:
     expiration-days: 7

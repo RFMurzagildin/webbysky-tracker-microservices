@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -14,39 +15,32 @@ import java.util.concurrent.TimeUnit;
 public class EmailVerificationService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private static final String KEY_PREFIX = "verification:";
+    private static final String VERIFY_CODE_PREFIX = "verification:";
     private static final Logger log = LoggerFactory.getLogger(EmailVerificationService.class);
 
-    public void saveCodeInRedis(String mail, String code, long ttlSeconds){
-        try{
-            redisTemplate.opsForValue().set(KEY_PREFIX + mail, code, ttlSeconds, TimeUnit.SECONDS);
-            log.info("Value({}) with key({}) added to Redis", code, mail);
-        }catch(RedisConnectionException e){
-            throw new RedisConnectionException("Unable to connect to Redis with root cause");
-        }
+    public void saveCodeInRedis(String email, String code, long ttlSeconds){
+        String key = VERIFY_CODE_PREFIX + email;
+        redisTemplate.opsForValue().set(key, code, ttlSeconds, TimeUnit.SECONDS);
+        log.info("Value({}) with key({}) added to Redis", code, email);
     }
 
-    public String getCodeFromRedis(String mail) throws RedisConnectionException {
-        return redisTemplate.opsForValue().get(KEY_PREFIX + mail);
+    public String getCodeFromRedis(String email) throws RedisConnectionException {
+        return redisTemplate.opsForValue().get(VERIFY_CODE_PREFIX + email);
     }
 
-    public void deleteCodeFromRedis(String mail){
-        try{
-            redisTemplate.delete(KEY_PREFIX + mail);
-            log.info("Key({}) and its value deleted from Redis", mail);
-        }catch (RedisConnectionException e){
-            throw new RedisConnectionException("Unable to connect to Redis with root cause");
-        }
-
+    public void deleteCodeFromRedis(String email){
+        String key = VERIFY_CODE_PREFIX + email;
+        redisTemplate.delete(key);
+        log.info("Key({}) and its value deleted from Redis", key);
     }
 
-    public boolean isValid(String mail, String code){
-        String storedCode = getCodeFromRedis(mail);
+    public boolean isValid(String email, String code){
+        String storedCode = getCodeFromRedis(email);
         if(storedCode != null && storedCode.equals(code)){
-            log.info("Key({}) with value({}) is available in Redis", mail, code);
+            log.info("Key({}) with value({}) is available in Redis", email, code);
             return true;
         }
-        log.info("Key({}) with value({}) is  not available in Redis or the code is incorrect", mail, code);
+        log.info("Key({}) with value({}) is  not available in Redis or the code is incorrect", email, code);
         return false;
     }
 

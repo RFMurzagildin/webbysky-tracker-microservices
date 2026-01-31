@@ -61,6 +61,13 @@ public class AuthController {
         return authService.refresh(dto);
     }
 
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    @ResponseStatus(HttpStatus.OK)
+    public void logout( @RequestHeader("Authorization") String authorizationHeader){
+        authService.logout(authorizationHeader);
+    }
+
     @GetMapping("/info")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")

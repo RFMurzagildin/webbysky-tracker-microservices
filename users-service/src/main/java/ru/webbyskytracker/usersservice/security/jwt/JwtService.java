@@ -34,6 +34,7 @@ public class JwtService {
     public JwtAuthDto generateAuthToken(String email, Long userId, String role){
         String accessToken = generateToken(email, userId, role, accessTokenExpiration, ChronoUnit.MINUTES);
         String refreshToken = generateToken(email, userId, role, refreshTokenExpirationDays, ChronoUnit.DAYS);
+        // сохранить refreshToken в Redis
         return new JwtAuthDto(accessToken, refreshToken);
     }
 
@@ -117,5 +118,7 @@ public class JwtService {
     public String getRoleFromToken(String token){
         return parseClaims(token).get("role", String.class);
     }
+
+
 
 }

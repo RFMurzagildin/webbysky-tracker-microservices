@@ -2,8 +2,8 @@ package ru.webbyskytracker.usersservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.webbyskytracker.usersservice.dto.request.LoginRequestDto;
@@ -18,16 +18,21 @@ import ru.webbyskytracker.usersservice.kafka.model.VerificationCodeEvent;
 import ru.webbyskytracker.usersservice.repository.UserRepository;
 import ru.webbyskytracker.usersservice.security.jwt.JwtService;
 
+import java.time.Duration;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final EmailVerificationService emailVerificationService;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final KafkaTemplate<String, VerificationCodeEvent> verificationCodeKafkaTemplate;
     private final KafkaTemplate<String,  EmailVerifiedEvent > emailVerifiedKafkaTemplate;
+    @Value("${jwt.refresh-token.expiration-days:7}")
+    private long refreshTokenExpirationDays;
 
     public User initiateRegistration(RegistrationUserDto dto){
         if(!dto.getPassword().equals(dto.getConfirmPassword())){
@@ -42,6 +47,7 @@ public class AuthService {
             log.info("Username is already taken");
             throw new UsernameAlreadyExistsException("Username is already taken");
         }
+
         String code = emailVerificationService.generateNewCode();
 
         emailVerificationService.saveCodeInRedis(dto.getEmail(), code, 120);
@@ -60,6 +66,7 @@ public class AuthService {
     }
 
     public User verifyMail(VerifyEmailDto dto){
+        //думаю, тут можно улучшить логику проверки кода
         String email = dto.getEmail();
         if (!emailVerificationService.isValid(email, dto.getCode())) {
             throw new InvalidVerificationCodeException("Invalid or expired code");
@@ -79,33 +86,69 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public JwtAuthDto login(LoginRequestDto loginDto) throws AuthenticationException {
+    public JwtAuthDto login(LoginRequestDto loginDto){
+        //проверяем, существует ли пользователь с данной почтой
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("Invalid email or password"));
 
+        //проверяем, подтвердил ли пользователь свою почту
         if (!user.getEmailVerified()) {
             throw new UserNotVerifiedException("Email not verified");
         }
 
+        //проверяем, сходятся ли пароли, который ввел пользователь и который хранится в БД
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new UserNotFoundException("Invalid email or password");
         }
 
-        return jwtService.generateAuthToken(user.getEmail(), user.getId(), user.getRole().name());
+        //если все проверки пройдены, то генерируются токены
+        JwtAuthDto jwtAuthDto = jwtService.generateAuthToken(user.getEmail(), user.getId(), user.getRole().name());
+        refreshTokenService.save(jwtAuthDto.getRefreshToken(), user.getId(), Duration.ofDays(refreshTokenExpirationDays));
+        return jwtAuthDto;
     }
 
     public JwtAuthDto refresh(RefreshRequestDto dto){
-        if (!jwtService.validateToken(dto.getRefreshToken())) {
+        String refreshToken = dto.getRefreshToken();
+        //проверка валидности токена
+        if (!jwtService.validateToken(refreshToken)) {
             throw new InvalidRefreshTokenException("Invalid refresh token");
         }
 
+        //проверка наличия токена в Redis
+        if(!refreshTokenService.exists(refreshToken)){
+            throw new InvalidRefreshTokenException("Refresh token not found in Redis");
+        }
+
         String email = jwtService.getEmailFromToken(dto.getRefreshToken());
-        Long userId = jwtService.getUserIdFromToken(dto.getRefreshToken());
+        String userId = String.valueOf(jwtService.getUserIdFromToken(dto.getRefreshToken()));
         String role = jwtService.getRoleFromToken(dto.getRefreshToken());
 
-        // Здесь в будущем будем проверять, что refresh token есть в Redis
-        // if (!refreshTokenStore.exists(refreshToken)) { throw ... }
+        //Доп.проверка соответствия пользователя
+        if (!userId.equals(refreshTokenService.getUserId(refreshToken))) {
+            throw new InvalidRefreshTokenException("User ID mismatch in refresh token");
+        }
 
-        return jwtService.refreshAuthToken(email, userId, role);
+        JwtAuthDto newTokens = jwtService.refreshAuthToken(email, Long.valueOf(userId), role);
+
+        //Удаляем из Redis старый токен и обновляем его новым
+        refreshTokenService.delete(refreshToken);
+        refreshTokenService.save(newTokens.getRefreshToken(), Long.valueOf(userId), Duration.ofDays(refreshTokenExpirationDays));
+
+        return newTokens;
+    }
+
+    public void logout(String authorizationHeader){
+        String refreshToken = extractTokenFromHeader(authorizationHeader);
+        if (refreshTokenService.exists(refreshToken)) {
+            refreshTokenService.delete(refreshToken);
+        }
+    }
+
+    // Вспомогательный метод для извлечения токена
+    private String extractTokenFromHeader(String header) {
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        throw new IllegalArgumentException("Invalid authorization header");
     }
 }
