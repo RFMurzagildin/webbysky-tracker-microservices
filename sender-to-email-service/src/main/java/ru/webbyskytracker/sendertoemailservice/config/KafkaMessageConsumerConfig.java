@@ -63,4 +63,5 @@ public class KafkaMessageConsumerConfig {
         factory.setConsumerFactory(emailVerifiedEventConsumerFactory());
         return factory;
     }
+
 }

@@ -26,6 +26,16 @@ public class EmailKafkaListener {
     }
 
     @KafkaListener(
+            topics = "reset-password-code-topic",
+            groupId = "notification-group",
+            containerFactory = "codeEventConcurrentKafkaListenerContainerFactory"
+    )
+    public void handleResetPassword(VerificationCodeEvent event){
+        log.info("Password reset code has been sent to {}", event.getEmail());
+        emailService.sendVerificationCode(event.getEmail(), event.getCode());
+    }
+
+    @KafkaListener(
             topics = "email-verified-topic",
             groupId = "notification-group",
             containerFactory = "emailVerifiedEventConcurrentKafkaListenerContainerFactory"

@@ -6,10 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.webbyskytracker.usersservice.dto.request.LoginRequestDto;
-import ru.webbyskytracker.usersservice.dto.request.RefreshRequestDto;
-import ru.webbyskytracker.usersservice.dto.request.RegistrationUserDto;
-import ru.webbyskytracker.usersservice.dto.request.VerifyEmailDto;
+import ru.webbyskytracker.usersservice.dto.request.*;
 import ru.webbyskytracker.usersservice.dto.response.JwtAuthDto;
 import ru.webbyskytracker.usersservice.entity.User;
 import ru.webbyskytracker.usersservice.exception.*;
@@ -33,6 +30,8 @@ public class AuthService {
     private final KafkaTemplate<String,  EmailVerifiedEvent > emailVerifiedKafkaTemplate;
     @Value("${jwt.refresh-token.expiration-days:7}")
     private long refreshTokenExpirationDays;
+    private static final String VERIFY_CODE_PREFIX = "verification:";
+    private static final String RESET_PASSWORD_PREFIX = "reset-password";
 
     public User initiateRegistration(RegistrationUserDto dto){
         if(!dto.getPassword().equals(dto.getConfirmPassword())){
@@ -50,7 +49,7 @@ public class AuthService {
 
         String code = emailVerificationService.generateNewCode();
 
-        emailVerificationService.saveCodeInRedis(dto.getEmail(), code, 120);
+        emailVerificationService.saveCodeInRedis(VERIFY_CODE_PREFIX, dto.getEmail(), code, 120);
 
         //Публикуем событие в Kafka
         VerificationCodeEvent event = new VerificationCodeEvent(dto.getEmail(), code);
@@ -66,9 +65,8 @@ public class AuthService {
     }
 
     public User verifyMail(VerifyEmailDto dto){
-        //думаю, тут можно улучшить логику проверки кода
         String email = dto.getEmail();
-        if (!emailVerificationService.isValid(email, dto.getCode())) {
+        if (!emailVerificationService.isValid(VERIFY_CODE_PREFIX, email, dto.getCode())) {
             throw new InvalidVerificationCodeException("Invalid or expired code");
         }
 
@@ -77,7 +75,7 @@ public class AuthService {
 
         user.setEmailVerified(true);
 
-        emailVerificationService.deleteCodeFromRedis(email);
+        emailVerificationService.deleteCodeFromRedis(VERIFY_CODE_PREFIX, email);
 
         //отправляем событие в Kafka
         EmailVerifiedEvent event = new EmailVerifiedEvent(email);
@@ -150,5 +148,37 @@ public class AuthService {
             return header.substring(7);
         }
         throw new IllegalArgumentException("Invalid authorization header");
+    }
+
+    public void initiatePasswordReset(String email){
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+        String resetCode = emailVerificationService.generateNewCode();
+        //Сохраняем код в Redis
+        emailVerificationService.saveCodeInRedis(RESET_PASSWORD_PREFIX, email, resetCode, 120);
+        //Отправляем событие в Kafka
+        VerificationCodeEvent event = new VerificationCodeEvent(email, resetCode);
+        verificationCodeKafkaTemplate.send("reset-password-code-topic", event);
+        log.info("Password reset code sent for {}", email);
+    }
+
+    public void resetPassword(ResetPasswordDto dto){
+        //Проверка на совпадение паролей
+        if(!dto.getNewPassword().equals(dto.getConfirmPassword())){
+            throw new PasswordMismatchException("New password and confirmation do not match");
+        }
+        if(!emailVerificationService.isValid(RESET_PASSWORD_PREFIX, dto.getEmail(), dto.getCode())){
+            throw new InvalidVerificationCodeException("Invalid or expired reset code");
+        }
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        //Обновляем пароль
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+        //Удаляем код из Redis
+        emailVerificationService.deleteCodeFromRedis("reset-password:", dto.getEmail());
+
+        log.info("Password successfully reset for {}", dto.getEmail());
     }
 }

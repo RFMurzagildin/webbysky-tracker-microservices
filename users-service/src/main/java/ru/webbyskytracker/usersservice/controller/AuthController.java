@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import ru.webbyskytracker.usersservice.dto.request.LoginRequestDto;
-import ru.webbyskytracker.usersservice.dto.request.RefreshRequestDto;
-import ru.webbyskytracker.usersservice.dto.request.RegistrationUserDto;
-import ru.webbyskytracker.usersservice.dto.request.VerifyEmailDto;
+import ru.webbyskytracker.usersservice.dto.request.*;
 import ru.webbyskytracker.usersservice.dto.response.JwtAuthDto;
 import ru.webbyskytracker.usersservice.dto.response.UserDtoResponse;
 import ru.webbyskytracker.usersservice.dto.response.UserInfo;
@@ -73,5 +70,19 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public UserInfo info(){
         return userService.getUserInfo();
+    }
+
+    @PostMapping("/forgot-password")
+    @PreAuthorize("permitAll()")
+    @ResponseStatus(HttpStatus.OK)
+    public void forgotPassword(@RequestParam String email){
+        authService.initiatePasswordReset(email);
+    }
+
+    @PostMapping("/reset-password")
+    @PreAuthorize("permitAll()")
+    @ResponseStatus(HttpStatus.OK)
+    public void resetPassword(@Valid @RequestBody ResetPasswordDto dto){
+        authService.resetPassword(dto);
     }
 }

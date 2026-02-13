@@ -15,27 +15,26 @@ import java.util.concurrent.TimeUnit;
 public class EmailVerificationService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private static final String VERIFY_CODE_PREFIX = "verification:";
     private static final Logger log = LoggerFactory.getLogger(EmailVerificationService.class);
 
-    public void saveCodeInRedis(String email, String code, long ttlSeconds){
-        String key = VERIFY_CODE_PREFIX + email;
+    public void saveCodeInRedis(String prefix, String email, String code, long ttlSeconds){
+        String key = prefix + email;
         redisTemplate.opsForValue().set(key, code, ttlSeconds, TimeUnit.SECONDS);
         log.info("Value({}) with key({}) added to Redis", code, email);
     }
 
-    public String getCodeFromRedis(String email) throws RedisConnectionException {
-        return redisTemplate.opsForValue().get(VERIFY_CODE_PREFIX + email);
+    public String getCodeFromRedis(String prefix, String email) throws RedisConnectionException {
+        return redisTemplate.opsForValue().get(prefix + email);
     }
 
-    public void deleteCodeFromRedis(String email){
-        String key = VERIFY_CODE_PREFIX + email;
+    public void deleteCodeFromRedis(String prefix, String email){
+        String key = prefix + email;
         redisTemplate.delete(key);
         log.info("Key({}) and its value deleted from Redis", key);
     }
 
-    public boolean isValid(String email, String code){
-        String storedCode = getCodeFromRedis(email);
+    public boolean isValid(String prefix, String email, String code){
+        String storedCode = getCodeFromRedis(prefix, email);
         if(storedCode != null && storedCode.equals(code)){
             log.info("Key({}) with value({}) is available in Redis", email, code);
             return true;
