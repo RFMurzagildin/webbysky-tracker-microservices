@@ -9,6 +9,8 @@ import ru.webbyskytracker.usersservice.entity.User;
 import ru.webbyskytracker.usersservice.exception.UserNotFoundException;
 import ru.webbyskytracker.usersservice.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -28,4 +30,10 @@ public class UserService {
         }
         return auth.getName();
     }
+
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
+
 }
