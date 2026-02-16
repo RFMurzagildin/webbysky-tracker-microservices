@@ -1,6 +1,0 @@
-CREATE TABLE tasks(
-      id BIGSERIAL PRIMARY KEY,
-      description VARCHAR(256) NOT NULL,
-      time TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-      user_id BIGINT REFERENCES users(id)
-);
