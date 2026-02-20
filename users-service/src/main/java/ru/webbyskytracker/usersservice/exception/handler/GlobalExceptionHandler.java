@@ -1,6 +1,7 @@
 package ru.webbyskytracker.usersservice.exception.handler;
 
 import io.lettuce.core.RedisConnectionException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,56 +26,114 @@ public class GlobalExceptionHandler {
             PasswordMismatchException.class
     })
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handlerUserRegistrationErrors(RuntimeException e){
-        log.info("Registration failed: {}", e.getMessage());
-        return new ErrorResponse("Registration failed: " + e.getMessage());
+    public ErrorResponse handlerUserRegistrationErrors(
+            RuntimeException ex,
+            HttpServletRequest request
+    ){
+        log.info("Registration failed: {}", ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                "Registration failed: " + ex.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(MethodArgumentNotValidException e){
-        String message = e.getBindingResult().getFieldErrors().stream()
+    public ErrorResponse handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ){
+        String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         log.info("Validation failed: {}", message);
-        return new ErrorResponse("Validation failed: " + message);
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Validation failed: " + message,
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(InvalidVerificationCodeException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handleInvalidCode(InvalidVerificationCodeException e){
-        log.info(e.getMessage());
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleInvalidCode(
+            InvalidVerificationCodeException ex,
+            HttpServletRequest request
+    ){
+        log.info(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleUserNotFound(UserNotFoundException e){
-        log.info(e.getMessage());
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleUserNotFound(
+            UserNotFoundException ex,
+            HttpServletRequest request
+    ){
+        log.info(ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleException(AuthenticationException ex) {
-        return new ErrorResponse("Authentication Failed" + ex.getMessage());
+    @ResponseStatus(
+            HttpStatus.FORBIDDEN
+    )
+    public ErrorResponse handleException(
+            AuthenticationException ex,
+            HttpServletRequest request
+    ) {
+        return new ErrorResponse(
+                HttpStatus.FORBIDDEN,
+                "Authentication Failed" + ex.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleInvalidRefresh(InvalidRefreshTokenException e) {
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleInvalidRefresh(
+            InvalidRefreshTokenException ex,
+            HttpServletRequest request
+    ) {
+        return new ErrorResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(UserNotVerifiedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorResponse handleUserNotVerified(UserNotVerifiedException e) {
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleUserNotVerified(
+            UserNotVerifiedException e,
+            HttpServletRequest request
+    ) {
+        return new ErrorResponse(
+                HttpStatus.FORBIDDEN,
+                e.getMessage(),
+                request.getServletPath()
+        );
     }
 
     @ExceptionHandler(RedisConnectionException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleRedisNotConnection(RedisConnectionException e) {
-        return new ErrorResponse(e.getMessage());
+    public ErrorResponse handleRedisNotConnection(
+            RedisConnectionException e,
+            HttpServletRequest request
+    ) {
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                e.getMessage(),
+                request.getServletPath()
+        );
     }
 }
