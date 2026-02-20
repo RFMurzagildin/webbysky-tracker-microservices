@@ -33,28 +33,19 @@ public class AuthService {
     private static final String VERIFY_CODE_PREFIX = "verification:";
     private static final String RESET_PASSWORD_PREFIX = "reset-password";
 
-    public User initiateRegistration(RegistrationUserDto dto){
-        if(!dto.getPassword().equals(dto.getConfirmPassword())){
-            log.info("Password and confirmation do not match");
-            throw new PasswordMismatchException("Password and confirmation do not match");
-        }
+    public User register(RegistrationUserDto dto){
         if(userRepository.existsByEmail(dto.getEmail())){
-            log.info("Email is already registered");
             throw new EmailAlreadyExistsException("Email is already registered");
         }
         if (userRepository.existsByUsername(dto.getUsername())) {
-            log.info("Username is already taken");
             throw new UsernameAlreadyExistsException("Username is already taken");
         }
 
         String code = emailVerificationService.generateNewCode();
-
         emailVerificationService.saveCodeInRedis(VERIFY_CODE_PREFIX, dto.getEmail(), code, 120);
 
-        //Публикуем событие в Kafka
         VerificationCodeEvent event = new VerificationCodeEvent(dto.getEmail(), code);
         verificationCodeKafkaTemplate.send("verification-code-topic", event);
-        log.info("Published verification code event for {}", dto.getEmail());
 
         return userRepository.save(new User(
                 dto.getUsername(),
@@ -66,21 +57,19 @@ public class AuthService {
 
     public User verifyMail(VerifyEmailDto dto){
         String email = dto.getEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Registration not initiated or user not found"));
+
         if (!emailVerificationService.isValid(VERIFY_CODE_PREFIX, email, dto.getCode())) {
             throw new InvalidVerificationCodeException("Invalid or expired code");
         }
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Registration not initiated or user not found"));
 
         user.setEmailVerified(true);
 
         emailVerificationService.deleteCodeFromRedis(VERIFY_CODE_PREFIX, email);
 
-        //отправляем событие в Kafka
         EmailVerifiedEvent event = new EmailVerifiedEvent(email);
         emailVerifiedKafkaTemplate.send("email-verified-topic",event);
-        log.info("Published email verified event for {}", user.getEmail());
         return userRepository.save(user);
     }
 

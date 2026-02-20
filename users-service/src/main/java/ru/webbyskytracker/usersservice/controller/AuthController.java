@@ -6,26 +6,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.webbyskytracker.usersservice.dto.request.*;
+import ru.webbyskytracker.usersservice.dto.response.BaseDtoResponse;
 import ru.webbyskytracker.usersservice.dto.response.JwtAuthDto;
-import ru.webbyskytracker.usersservice.dto.response.UserDtoResponse;
-import ru.webbyskytracker.usersservice.dto.response.UserInfo;
 import ru.webbyskytracker.usersservice.entity.User;
 import ru.webbyskytracker.usersservice.service.AuthService;
-import ru.webbyskytracker.usersservice.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final UserService userService;
     private final AuthService authService;
 
     @PostMapping("/register")
     @PreAuthorize("permitAll()")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public UserDtoResponse registerNewUser(@Valid @RequestBody RegistrationUserDto dto){
-            User user = authService.initiateRegistration(dto);
-            return new UserDtoResponse(
+    @ResponseStatus(HttpStatus.OK)
+    public BaseDtoResponse registerNewUser(@Valid @RequestBody RegistrationUserDto dto){
+            User user = authService.register(dto);
+            return new BaseDtoResponse(
+                    user.getId(),
                     user.getUsername(),
                     user.getEmail(),
                     "Verification code sent to " + user.getEmail()
@@ -35,9 +33,10 @@ public class AuthController {
     @PostMapping("/verify-email")
     @PreAuthorize("permitAll()")
     @ResponseStatus(HttpStatus.OK)
-    public UserDtoResponse verifyMail(@Valid @RequestBody VerifyEmailDto verifyEmailDto){
+    public BaseDtoResponse verifyMail(@Valid @RequestBody VerifyEmailDto verifyEmailDto){
         User user = authService.verifyMail(verifyEmailDto);
-        return new UserDtoResponse(
+        return new BaseDtoResponse(
+                user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 "Mail has been successfully confirmed"
@@ -63,13 +62,6 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     public void logout( @RequestHeader("Authorization") String authorizationHeader){
         authService.logout(authorizationHeader);
-    }
-
-    @GetMapping("/info")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("isAuthenticated()")
-    public UserInfo info(){
-        return userService.getUserInfo();
     }
 
     @PostMapping("/forgot-password")

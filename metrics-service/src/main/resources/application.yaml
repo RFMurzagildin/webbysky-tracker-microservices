@@ -1,0 +1,37 @@
+server:
+  port: 8081
+
+spring:
+  #Application Info
+  application:
+    name: metrics-service
+  # DataSource
+  datasource:
+    password: ${DB_PASSWORD}
+    username: ${DB_USERNAME}
+    url: jdbc:postgresql://localhost:5432/webbysky-tracker-db
+    driver-class-name: org.postgresql.Driver
+  # JPA / Hibernate
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+#Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${random.uuid}
+
+#Logging
+logging:
+  pattern:
+    console: "%-5level %d{HH:mm:ss} - %msg%n"
+
+#JWT
+jwt:
+  secret: ${JWT_SECRET_KEY}
+

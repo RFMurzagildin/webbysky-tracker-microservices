@@ -10,9 +10,20 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/api-gateway" />
             <option value="$PROJECT_DIR$/config-server" />
             <option value="$PROJECT_DIR$/eureka-server" />
             <option value="$PROJECT_DIR$/user-service" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="LOCAL" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/api-gateway" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../4_semester/ORIS/gradle-8.13" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/api-gateway" />
           </set>
         </option>
       </GradleProjectSettings>
@@ -33,6 +44,16 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/eureka-server" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="LOCAL" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/metrics-service" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../4_semester/ORIS/gradle-8.13" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/metrics-service" />
           </set>
         </option>
       </GradleProjectSettings>

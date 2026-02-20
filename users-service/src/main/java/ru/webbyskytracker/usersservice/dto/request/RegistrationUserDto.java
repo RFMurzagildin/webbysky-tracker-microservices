@@ -13,16 +13,10 @@ public class RegistrationUserDto {
     @Size(min = 4, max = 12)
     @Username
     private String username;
-
     @NotBlank
     @Email
     private String email;
-
     @NotBlank
     @Password
     private String password;
-
-    @NotBlank
-    private String confirmPassword;
-
 }

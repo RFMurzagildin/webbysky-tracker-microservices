@@ -10,7 +10,6 @@ public class VerifyEmailDto {
     @NotBlank
     @Email
     private String email;
-
     @NotBlank
     @Pattern(regexp = "\\d{5}", message = "Code must be 5 digits")
     private String code;
