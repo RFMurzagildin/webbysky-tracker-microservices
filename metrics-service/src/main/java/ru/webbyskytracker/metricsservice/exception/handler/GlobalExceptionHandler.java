@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.webbyskytracker.metricsservice.dto.response.ErrorResponse;
+import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
 import ru.webbyskytracker.metricsservice.exception.InvalidTokenException;
 
 import java.time.LocalDateTime;
@@ -20,10 +21,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidTokenException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handlerInvalidTokenExceptions(
-            InvalidTokenException ex,
-            HttpServletRequest request
+        InvalidTokenException ex,
+        HttpServletRequest request
     ){
         log.warn("Invalid token: {}", ex.getMessage());
-        return new ErrorResponse(LocalDateTime.now(), HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getServletPath());
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getServletPath()
+        );
+    }
+
+    @ExceptionHandler(HabitAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handlerHabitAlreadyExistsException(
+        HabitAlreadyExistsException ex,
+        HttpServletRequest request
+    ){
+        log.warn("Habit already exists: {}", ex.getMessage());
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getServletPath()
+        );
     }
 }

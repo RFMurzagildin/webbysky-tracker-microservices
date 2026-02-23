@@ -1,3 +1,3 @@
-TRUNCATE TABLE users RESTART IDENTITY;
+TRUNCATE TABLE schema_users.users RESTART IDENTITY;
 
-DROP TABLE users;
+DROP TABLE schema_users.users;

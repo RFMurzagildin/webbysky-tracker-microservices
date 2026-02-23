@@ -6,4 +6,5 @@ import ru.webbyskytracker.metricsservice.entity.Habit;
 
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
+    boolean existsByUserIdAndName(Long userId, String name);
 }
