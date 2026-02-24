@@ -26,7 +26,7 @@ public class Habit {
     @Column(name = "color", length = 7)
     private String color = "#4CAF50";
     @Column(name = "is_active")
-    private Boolean isActive = true;
+    private Boolean isActive;
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 }

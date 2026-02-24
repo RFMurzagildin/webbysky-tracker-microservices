@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 @Builder
 public class HabitResponseDto {
     private Long id;
+    private Long userId;
     private String name;
-    private String message;
+    private String color;
+    private Boolean isActive;
     private LocalDateTime createdAt;
 }
