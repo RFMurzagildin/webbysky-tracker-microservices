@@ -11,6 +11,7 @@ import ru.webbyskytracker.usersservice.dto.response.JwtAuthDto;
 import ru.webbyskytracker.usersservice.entity.User;
 import ru.webbyskytracker.usersservice.exception.*;
 import ru.webbyskytracker.usersservice.kafka.model.EmailVerifiedEvent;
+import ru.webbyskytracker.usersservice.kafka.model.UserRegisteredEvent;
 import ru.webbyskytracker.usersservice.kafka.model.VerificationCodeEvent;
 import ru.webbyskytracker.usersservice.repository.UserRepository;
 import ru.webbyskytracker.usersservice.security.jwt.JwtService;
@@ -28,6 +29,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final KafkaTemplate<String, VerificationCodeEvent> verificationCodeKafkaTemplate;
     private final KafkaTemplate<String,  EmailVerifiedEvent > emailVerifiedKafkaTemplate;
+    private final KafkaTemplate<String, UserRegisteredEvent> userRegisteredKafkaTemplate;
     @Value("${jwt.refresh-token.expiration-days:7}")
     private long refreshTokenExpirationDays;
     private static final String VERIFY_CODE_PREFIX = "verification:";
@@ -68,8 +70,17 @@ public class AuthService {
 
         emailVerificationService.deleteCodeFromRedis(VERIFY_CODE_PREFIX, email);
 
-        EmailVerifiedEvent event = new EmailVerifiedEvent(email);
-        emailVerifiedKafkaTemplate.send("email-verified-topic",event);
+        EmailVerifiedEvent emailVerifiedEvent = new EmailVerifiedEvent(email);
+        emailVerifiedKafkaTemplate.send("email-verified-topic", emailVerifiedEvent);
+
+        UserRegisteredEvent userRegisteredEvent = new UserRegisteredEvent(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername()
+        );
+        //ОТПРАВЛЯЕТ ЕЩЕ ОДНО СОБЫТИЕ В KAFKA ДЛЯ METRICS-SERVICE
+        userRegisteredKafkaTemplate.send("user-registered-topic", userRegisteredEvent);
+
         return userRepository.save(user);
     }
 

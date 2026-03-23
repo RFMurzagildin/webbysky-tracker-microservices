@@ -25,7 +25,9 @@ public class HabitService {
         if(!jwtService.validateToken(token)){
             throw new InvalidTokenException("Token is invalid or expired");
         }
+
         Long userId = jwtService.getUserIdFromToken(token);
+
         if(habitRepository.existsByUserIdAndName(userId, dto.getName())){
             throw new HabitAlreadyExistsException("Habit with this name already exists");
         }
@@ -37,6 +39,7 @@ public class HabitService {
                         .isActive(true)
                         .createdAt(LocalDateTime.now())
                 .build());
+
         return toDto(saved);
     }
 
@@ -66,13 +69,14 @@ public class HabitService {
         Long userId = jwtService.getUserIdFromToken(token);
         Habit habit = habitRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new HabitNotFoundException("Habit not found"));
-        if(dto.getName() == null || dto.getColor() == null || dto.getIsActive() == null){
-            throw new NullPointerException("The field is null");
+
+        if(!dto.getName().equals(habit.getName())){
+            if(habitRepository.existsByUserIdAndName(userId, dto.getName())){
+                throw new HabitAlreadyExistsException("Habit with this name already exists");
+            }
+            habit.setName(dto.getName());
         }
-        if(habitRepository.existsByUserIdAndName(userId, dto.getName())){
-            throw new HabitAlreadyExistsException("Habit with this name already exists");
-        }
-        habit.setName(dto.getName());
+
         habit.setColor(dto.getColor());
         habit.setIsActive(dto.getIsActive());
 

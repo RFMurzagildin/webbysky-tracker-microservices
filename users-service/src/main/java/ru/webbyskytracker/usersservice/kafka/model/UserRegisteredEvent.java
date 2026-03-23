@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EmailVerifiedEvent {
+public class UserRegisteredEvent {
+    private Long userId;
     private String email;
+    private String username;
 }

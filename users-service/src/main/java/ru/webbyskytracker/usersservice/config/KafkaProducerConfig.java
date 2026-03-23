@@ -1,6 +1,7 @@
 package ru.webbyskytracker.usersservice.config;
 
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ProducerFactory;
 import ru.webbyskytracker.usersservice.kafka.model.EmailVerifiedEvent;
+import ru.webbyskytracker.usersservice.kafka.model.UserRegisteredEvent;
 import ru.webbyskytracker.usersservice.kafka.model.VerificationCodeEvent;
 
 import java.util.HashMap;
@@ -18,10 +20,15 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
     @Bean
-    public ProducerFactory<String, VerificationCodeEvent> verificationCodeEventProducerFactory(ObjectMapper objectMapper){
+    public ProducerFactory<String, VerificationCodeEvent> verificationCodeEventProducerFactory(
+            ObjectMapper objectMapper
+    ){
         Map<String, Object> configProperties = new HashMap<>();
-        configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
         JsonSerializer<VerificationCodeEvent> serializer = new JsonSerializer<>(objectMapper);
         serializer.setAddTypeInfo(false);
@@ -41,15 +48,17 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, EmailVerifiedEvent> emailVerifiedProducerFactory(ObjectMapper objectMapper) {
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+    public ProducerFactory<String, EmailVerifiedEvent> emailVerifiedProducerFactory(
+            ObjectMapper objectMapper
+    ) {
+        Map<String, Object> configProperties = new HashMap<>();
+        configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
         JsonSerializer<EmailVerifiedEvent> serializer = new JsonSerializer<>(objectMapper);
         serializer.setAddTypeInfo(false);
 
         return new DefaultKafkaProducerFactory<>(
-                configProps,
+                configProperties,
                 new StringSerializer(),
                 serializer
         );
@@ -59,6 +68,30 @@ public class KafkaProducerConfig {
     public KafkaTemplate<String, EmailVerifiedEvent> emailVerifiedKafkaTemplate(
             ProducerFactory<String, EmailVerifiedEvent> producerFactory
     ) {
+        return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, UserRegisteredEvent> userRegisteredProducerFactory(
+            ObjectMapper objectMapper
+    ){
+        Map<String, Object> configProperties = new HashMap<>();
+        configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        JsonSerializer<UserRegisteredEvent> serializer = new JsonSerializer<>(objectMapper);
+        serializer.setAddTypeInfo(false);
+
+        return new DefaultKafkaProducerFactory<>(
+                configProperties,
+                new StringSerializer(),
+                serializer
+        );
+    }
+
+    @Bean
+    public KafkaTemplate<String, UserRegisteredEvent> userRegisteredKafkaTemplate(
+            ProducerFactory<String, UserRegisteredEvent> producerFactory
+    ){
         return new KafkaTemplate<>(producerFactory);
     }
 
