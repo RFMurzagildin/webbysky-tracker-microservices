@@ -8,7 +8,6 @@ import ru.webbyskytracker.metricsservice.dto.response.HabitResponseDto;
 import ru.webbyskytracker.metricsservice.entity.Habit;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
 import ru.webbyskytracker.metricsservice.exception.HabitNotFoundException;
-import ru.webbyskytracker.metricsservice.exception.InvalidTokenException;
 import ru.webbyskytracker.metricsservice.repository.HabitRepository;
 
 import java.time.LocalDateTime;
@@ -19,21 +18,14 @@ import java.util.List;
 public class HabitService {
 
     private final HabitRepository habitRepository;
-    private final JwtService jwtService;
 
-    public HabitResponseDto createHabit(String token, CreateHabitDto dto){
-        if(!jwtService.validateToken(token)){
-            throw new InvalidTokenException("Token is invalid or expired");
-        }
-
-        Long userId = jwtService.getUserIdFromToken(token);
-
+    public HabitResponseDto createHabit(Long userId, CreateHabitDto dto){
         if(habitRepository.existsByUserIdAndName(userId, dto.getName())){
             throw new HabitAlreadyExistsException("Habit with this name already exists");
         }
         Habit saved = habitRepository.save(
                 Habit.builder()
-                        .userId(jwtService.getUserIdFromToken(token))
+                        .userId(userId)
                         .name(dto.getName())
                         .color(dto.getColor())
                         .isActive(true)
@@ -43,30 +35,18 @@ public class HabitService {
         return toDto(saved);
     }
 
-    public List<HabitResponseDto> getAllHabits(String token){
-        if(!jwtService.validateToken(token)){
-            throw new InvalidTokenException("Token is invalid or expired");
-        }
-        Long userId = jwtService.getUserIdFromToken(token);
+    public List<HabitResponseDto> getAllHabits(Long userId){
         List<Habit> habits = habitRepository.findByUserId(userId);
         return habits.stream().map(this::toDto).toList();
     }
 
-    public HabitResponseDto getHabitById(Long id, String token){
-        if(!jwtService.validateToken(token)){
-            throw new InvalidTokenException("Token is invalid or expired");
-        }
-        Long userId = jwtService.getUserIdFromToken(token);
+    public HabitResponseDto getHabitById(Long id, Long userId){
         Habit habit = habitRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new HabitNotFoundException("Habit not found"));
         return toDto(habit);
     }
 
-    public HabitResponseDto updateHabit(Long id, String token, UpdateHabitDto dto){
-        if(!jwtService.validateToken(token)){
-            throw new InvalidTokenException("Token is invalid or expired");
-        }
-        Long userId = jwtService.getUserIdFromToken(token);
+    public HabitResponseDto updateHabit(Long id, Long userId, UpdateHabitDto dto){
         Habit habit = habitRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new HabitNotFoundException("Habit not found"));
 
@@ -83,11 +63,7 @@ public class HabitService {
         return toDto(habitRepository.save(habit));
     }
 
-    public void deleteHabit(Long id, String token){
-        if(!jwtService.validateToken(token)){
-            throw new InvalidTokenException("Token is invalid or expired");
-        }
-        Long userId = jwtService.getUserIdFromToken(token);
+    public void deleteHabit(Long id, Long userId){
         Habit habit = habitRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new HabitNotFoundException("Habit not found"));
         habitRepository.deleteById(habit.getId());

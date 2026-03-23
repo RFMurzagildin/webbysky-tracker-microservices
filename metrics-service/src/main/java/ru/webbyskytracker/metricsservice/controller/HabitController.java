@@ -3,6 +3,7 @@ package ru.webbyskytracker.metricsservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.webbyskytracker.metricsservice.dto.request.CreateHabitDto;
 import ru.webbyskytracker.metricsservice.dto.request.UpdateHabitDto;
@@ -21,46 +22,41 @@ public class HabitController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public HabitResponseDto createHabit(
-            @RequestHeader("Authorization") String accessToken,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody CreateHabitDto habit
     ){
-        String token = accessToken.replace("Bearer ", "");
-        return habitService.createHabit(token, habit);
+        return habitService.createHabit(userId, habit);
     }
 
     @GetMapping
     public List<HabitResponseDto> getAllHabits(
-            @RequestHeader("Authorization") String accessToken
+            @AuthenticationPrincipal Long userId
     ){
-        String token = accessToken.replace("Bearer ", "");
-        return habitService.getAllHabits(token);
+        return habitService.getAllHabits(userId);
     }
 
     @GetMapping("/{id}")
     public HabitResponseDto getHabitById(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String accessToken
+            @AuthenticationPrincipal Long userId
     ){
-        String token = accessToken.replace("Bearer ", "");
-        return habitService.getHabitById(id, token);
+        return habitService.getHabitById(id, userId);
     }
 
     @PutMapping("/{id}")
     public HabitResponseDto updateHabit(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String accessToken,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateHabitDto dto
     ){
-        String token = accessToken.replace("Bearer ", "");
-        return habitService.updateHabit(id, token, dto);
+        return habitService.updateHabit(id, userId, dto);
     }
 
     @DeleteMapping("/{id}")
     public void deleteHabit(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String accessToken
+            @AuthenticationPrincipal Long userId
     ){
-        String token = accessToken.replace("Bearer ", "");
-        habitService.deleteHabit(id, token);
+        habitService.deleteHabit(id, userId);
     }
 }
