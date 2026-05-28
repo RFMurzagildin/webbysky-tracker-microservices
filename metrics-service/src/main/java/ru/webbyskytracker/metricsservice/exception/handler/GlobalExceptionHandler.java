@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.webbyskytracker.metricsservice.dto.response.ErrorResponse;
 import ru.webbyskytracker.metricsservice.exception.CompletionNotFoundException;
+import ru.webbyskytracker.metricsservice.exception.DailyMetricNotFoundException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyCompletedException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
 import ru.webbyskytracker.metricsservice.exception.HabitNotFoundException;
@@ -77,6 +78,20 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handlerCompletionNotFoundException(
             CompletionNotFoundException ex,
+            HttpServletRequest request
+    ){
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                request.getServletPath()
+        );
+    }
+
+    @ExceptionHandler(DailyMetricNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handlerDailyMetricNotFoundException(
+            DailyMetricNotFoundException ex,
             HttpServletRequest request
     ){
         return new ErrorResponse(

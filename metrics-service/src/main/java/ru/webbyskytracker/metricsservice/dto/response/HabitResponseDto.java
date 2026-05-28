@@ -3,7 +3,6 @@ package ru.webbyskytracker.metricsservice.dto.response;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,5 +16,5 @@ public class HabitResponseDto {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private Integer streak;
-    private List<LocalDate> completedDates;
+    private List<HabitCompletionSummaryDto> completions;
 }

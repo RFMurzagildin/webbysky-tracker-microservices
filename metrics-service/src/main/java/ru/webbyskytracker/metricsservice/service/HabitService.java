@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.webbyskytracker.metricsservice.dto.request.CreateHabitDto;
 import ru.webbyskytracker.metricsservice.dto.request.UpdateHabitDto;
+import ru.webbyskytracker.metricsservice.dto.response.HabitCompletionSummaryDto;
 import ru.webbyskytracker.metricsservice.dto.response.HabitResponseDto;
 import ru.webbyskytracker.metricsservice.entity.Habit;
 import ru.webbyskytracker.metricsservice.entity.HabitCompletion;
@@ -90,9 +91,16 @@ public class HabitService {
     }
 
     private HabitResponseDto toDto(Habit habit, List<HabitCompletion> completions) {
-        List<LocalDate> completedDates = completions.stream()
-                .map(HabitCompletion::getCompletedAt)
-                .sorted(Comparator.reverseOrder())
+        List<HabitCompletionSummaryDto> summaries = completions.stream()
+                .sorted(Comparator.comparing(HabitCompletion::getCompletedAt).reversed())
+                .map(c -> HabitCompletionSummaryDto.builder()
+                        .completedAt(c.getCompletedAt())
+                        .note(c.getNote())
+                        .build())
+                .toList();
+
+        List<LocalDate> sortedDatesDesc = summaries.stream()
+                .map(HabitCompletionSummaryDto::getCompletedAt)
                 .toList();
 
         return HabitResponseDto.builder()
@@ -102,8 +110,8 @@ public class HabitService {
                 .color(habit.getColor())
                 .isActive(habit.getIsActive())
                 .createdAt(habit.getCreatedAt())
-                .streak(calculateStreak(completedDates))
-                .completedDates(completedDates)
+                .streak(calculateStreak(sortedDatesDesc))
+                .completions(summaries)
                 .build();
     }
 
