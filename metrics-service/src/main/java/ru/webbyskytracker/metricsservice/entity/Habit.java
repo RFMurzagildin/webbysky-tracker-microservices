@@ -28,7 +28,7 @@ public class Habit {
     private Boolean isActive;
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-    @OneToMany(mappedBy = "habit")
+    @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HabitCompletion> completions;
     @Column(name = "user_id", nullable = false)
     private Long userId;

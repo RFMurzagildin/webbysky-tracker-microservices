@@ -135,19 +135,10 @@ public class AuthService {
         return newTokens;
     }
 
-    public void logout(String authorizationHeader){
-        String refreshToken = extractTokenFromHeader(authorizationHeader);
+    public void logout(String refreshToken){
         if (refreshTokenService.exists(refreshToken)) {
             refreshTokenService.delete(refreshToken);
         }
-    }
-
-    // Вспомогательный метод для извлечения токена
-    private String extractTokenFromHeader(String header) {
-        if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
-        }
-        throw new IllegalArgumentException("Invalid authorization header");
     }
 
     public void initiatePasswordReset(String email){
@@ -177,7 +168,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
         //Удаляем код из Redis
-        emailVerificationService.deleteCodeFromRedis("reset-password:", dto.getEmail());
+        emailVerificationService.deleteCodeFromRedis(RESET_PASSWORD_PREFIX, dto.getEmail());
 
         log.info("Password successfully reset for {}", dto.getEmail());
     }

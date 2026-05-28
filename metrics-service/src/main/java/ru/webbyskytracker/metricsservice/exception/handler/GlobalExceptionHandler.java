@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.webbyskytracker.metricsservice.dto.response.ErrorResponse;
+import ru.webbyskytracker.metricsservice.exception.CompletionNotFoundException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyCompletedException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
 import ru.webbyskytracker.metricsservice.exception.HabitNotFoundException;
@@ -67,6 +68,20 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getServletPath()
+        );
+    }
+
+    @ExceptionHandler(CompletionNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handlerCompletionNotFoundException(
+            CompletionNotFoundException ex,
+            HttpServletRequest request
+    ){
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 request.getServletPath()
         );

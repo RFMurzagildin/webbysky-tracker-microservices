@@ -13,6 +13,5 @@ public class CreateCompletionDto {
     @NotNull
     private LocalDate completedAt;
     @Size(max = 500)
-    @NotNull
     private String note;
 }

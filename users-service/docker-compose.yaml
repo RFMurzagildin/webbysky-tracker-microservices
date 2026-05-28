@@ -1,5 +1,10 @@
 version: '3'
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:

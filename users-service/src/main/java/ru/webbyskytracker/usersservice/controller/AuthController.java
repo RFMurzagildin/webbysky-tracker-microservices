@@ -60,8 +60,8 @@ public class AuthController {
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.OK)
-    public void logout( @RequestHeader("Authorization") String authorizationHeader){
-        authService.logout(authorizationHeader);
+    public void logout(@Valid @RequestBody RefreshRequestDto dto){
+        authService.logout(dto.getRefreshToken());
     }
 
     @PostMapping("/forgot-password")

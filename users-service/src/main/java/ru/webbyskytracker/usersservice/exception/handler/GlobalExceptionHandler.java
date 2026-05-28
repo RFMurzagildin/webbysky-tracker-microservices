@@ -22,18 +22,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             EmailAlreadyExistsException.class,
-            UsernameAlreadyExistsException.class,
-            PasswordMismatchException.class
+            UsernameAlreadyExistsException.class
     })
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponse handlerUserRegistrationErrors(
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflict(
             RuntimeException ex,
             HttpServletRequest request
     ){
-        log.info("Registration failed: {}", ex.getMessage());
+        log.info("Conflict: {}", ex.getMessage());
         return new ErrorResponse(
-                HttpStatus.UNAUTHORIZED,
-                "Registration failed: " + ex.getMessage(),
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getServletPath()
+        );
+    }
+
+    @ExceptionHandler(PasswordMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlePasswordMismatch(
+            PasswordMismatchException ex,
+            HttpServletRequest request
+    ){
+        log.info("Password mismatch: {}", ex.getMessage());
+        return new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
                 request.getServletPath()
         );
     }
