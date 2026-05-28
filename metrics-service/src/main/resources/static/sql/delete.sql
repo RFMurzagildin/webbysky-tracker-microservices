@@ -1,3 +1,2 @@
 TRUNCATE TABLE schema_metrics.habits RESTART IDENTITY;
 
-TRUNCATE TABLE schema_metrics.users RESTART IDENTITY;

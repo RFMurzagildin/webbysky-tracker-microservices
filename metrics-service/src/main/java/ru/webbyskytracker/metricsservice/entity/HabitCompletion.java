@@ -11,7 +11,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "habit_completions", schema = "schema_metrics")
+@Table(
+    name = "habit_completions",
+    schema = "schema_metrics",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"habit_id", "completed_at"})
+)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
