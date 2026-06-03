@@ -7,8 +7,20 @@ pluginManagement {
 
 rootProject.name = "webbysky-tracker-microservices"
 
+/*include("eureka-server")
+include("user-service")
+include("metrics-service")
+include("sender-to-email-service")
+include("ai-service")
+include("config-server")
+include("api-gateway")*/
+
+
+
 include("eureka-server",
     "user-service",
-    "config-server")
+    "config-server",
+    "ai-service")
 include("api-gateway")
+
 

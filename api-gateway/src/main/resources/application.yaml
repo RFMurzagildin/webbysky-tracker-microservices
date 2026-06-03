@@ -27,6 +27,13 @@ spring:
                 - Path=/api/v1/auth/**
               filters:
                 - StripPrefix=0
+            # Маршрут к ai-service
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/api/v1/ai/**
+              filters:
+                - StripPrefix=0
 
 eureka:
   client:

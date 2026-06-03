@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
     boolean existsByUserIdAndName(Long userId, String name);
+    int countByUserId(Long userId);
     List<Habit> findByUserId(Long userId);
     Optional<Habit> findByIdAndUserId(Long id, Long userId);
 }

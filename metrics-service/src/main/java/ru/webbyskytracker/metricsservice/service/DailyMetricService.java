@@ -54,7 +54,7 @@ public class DailyMetricService {
         return repository.findByUserIdOrderByDateDesc(userId)
                 .stream().map(this::toDto).toList();
     }
-    
+
     private DailyMetricResponseDto toDto(DailyMetric m) {
         return DailyMetricResponseDto.builder()
                 .id(m.getId())

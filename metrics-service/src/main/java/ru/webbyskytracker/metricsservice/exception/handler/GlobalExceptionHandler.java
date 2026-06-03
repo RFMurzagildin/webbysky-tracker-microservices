@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.webbyskytracker.metricsservice.dto.response.ErrorResponse;
 import ru.webbyskytracker.metricsservice.exception.CompletionNotFoundException;
 import ru.webbyskytracker.metricsservice.exception.DailyMetricNotFoundException;
+import ru.webbyskytracker.metricsservice.exception.HabitLimitReachedException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyCompletedException;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
 import ru.webbyskytracker.metricsservice.exception.HabitNotFoundException;
@@ -27,6 +28,20 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getServletPath()
+        );
+    }
+
+    @ExceptionHandler(HabitLimitReachedException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handlerHabitLimitReachedException(
+        HabitLimitReachedException ex,
+        HttpServletRequest request
+    ){
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.getMessage(),
                 request.getServletPath()
         );

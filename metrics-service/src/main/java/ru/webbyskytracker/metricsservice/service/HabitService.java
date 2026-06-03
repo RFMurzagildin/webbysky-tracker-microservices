@@ -9,6 +9,7 @@ import ru.webbyskytracker.metricsservice.dto.response.HabitResponseDto;
 import ru.webbyskytracker.metricsservice.entity.Habit;
 import ru.webbyskytracker.metricsservice.entity.HabitCompletion;
 import ru.webbyskytracker.metricsservice.exception.HabitAlreadyExistsException;
+import ru.webbyskytracker.metricsservice.exception.HabitLimitReachedException;
 import ru.webbyskytracker.metricsservice.exception.HabitNotFoundException;
 import ru.webbyskytracker.metricsservice.repository.HabitCompletionRepository;
 import ru.webbyskytracker.metricsservice.repository.HabitRepository;
@@ -27,7 +28,12 @@ public class HabitService {
     private final HabitRepository habitRepository;
     private final HabitCompletionRepository completionRepository;
 
+    private static final int HABIT_LIMIT = 5;
+
     public HabitResponseDto createHabit(Long userId, CreateHabitDto dto) {
+        if (habitRepository.countByUserId(userId) >= HABIT_LIMIT) {
+            throw new HabitLimitReachedException("Habit limit reached");
+        }
         if (habitRepository.existsByUserIdAndName(userId, dto.getName())) {
             throw new HabitAlreadyExistsException("Habit with this name already exists");
         }
